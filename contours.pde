@@ -25,13 +25,13 @@ void setup()
   double compacite;
   
   PImage image;
-  //image = loadImage("../data/synthetic1.png");
+  image = loadImage("../data/synthetic1.png");
   //scale(0.8);
   //image = loadImage("../data/synthetic2.png");
   //scale(0.8);
   //image = loadImage("../data/synthetic3.png");
-  //scale(0.8);
-  image = loadImage("../data/webcam.jpg");
+  scale(0.8);
+  //image = loadImage("../data/webcam.jpg");
   //image = loadImage("../data/smallCube1.png");
   //image = loadImage("../data/smallCube2.png");
   
@@ -55,61 +55,6 @@ void setup()
   }
   
   image_modif.updatePixels();
-  
-  /*PImage processedImage = Erosion.apply(image_modif, 5);
-  
-  for (int i = 0; i < processedImage.pixels.length; i++) 
-  {
-    if(red(processedImage.pixels[i]) == 255)
-    {
-      p++;
-      
-      moyenne_X += i % image.width;
-      //moyenne_Y += (i  - i % image.width) / image.width; 
-      moyenne_Y += (int) (i / image.width);
-    }
-  }
-  
-  moyenne_X = (int) (moyenne_X / p);
-  moyenne_Y = (int) (moyenne_Y / p);
-  
-  //println(moyenne_X);
-  //println(moyenne_Y);
-  
-  for (int i = 0; i < processedImage.pixels.length; i++) 
-  {
-    if(red(processedImage.pixels[i]) == 255)
-    {
-      moyenne_dist += dist(moyenne_X, moyenne_Y, i % processedImage.width, ((int) (i / processedImage.width)));
-    }    
-  }
-  
-  moyenne_dist = (int) (moyenne_dist / p);
-  
-  //println(moyenne_dist);
-  
-  for (int i = 0; i < processedImage.pixels.length; i++) 
-  {
-    if(red(processedImage.pixels[i]) == 255)
-    {
-      if(dist(moyenne_X, moyenne_Y, i % processedImage.width, ((int) (i / processedImage.width))) > 2 * moyenne_dist)
-      {
-        processedImage.pixels[i] = color(0, 0, 0); 
-      }
-    }
-  }
-  
-  processedImage.updatePixels();
-  
-  PImage processedImage2 = Dilation.apply(processedImage, 5);  // radius is a positive number
-  
-  for (int i = 0; i < processedImage2.pixels.length; i++) 
-  {
-    if(red(processedImage2.pixels[i]) == 255)
-    {
-      nb_blanc++;
-    }
-  }*/
   
   PImage processedImage3 = CannyEdgeDetector.apply(image_modif);
   
