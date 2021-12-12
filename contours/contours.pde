@@ -159,8 +159,6 @@ void setup()
   norm.setMag(100);//normalize();
   
   
-  
-  
   image_contours.pixels[imIndex(edgex, edgey)] = color(255, 255, 255);
   
   image_contours.updatePixels();
