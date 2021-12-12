@@ -2,12 +2,12 @@ import milchreis.imageprocessing.*;
 import milchreis.imageprocessing.utils.*;
 
 
-//String imgFile ="../data/synthetic1.png";
-String imgFile ="../data/synthetic2.png";
-//String imgFile ="../data/synthetic3.png";
-//String imgFile ="../data/webcam.jpg";
-//String imgFile ="../data/smallCube1.png";
-//String imgFile ="../data/smallCube2.png";
+//String imgFile ="../../data/synthetic1.png";
+String imgFile ="../../data/synthetic2.png";
+//String imgFile ="../../data/synthetic3.png";
+//String imgFile ="../../data/webcam.jpg";
+//String imgFile ="../../data/smallCube1.png";
+//String imgFile ="../../data/smallCube2.png";
 
 PImage image;
 PImage image_modif;
@@ -21,6 +21,10 @@ void settings() {
 //index du pixel de coordonnées i,j
 int imIndex(int i, int j) {
   return i + j*image_contours.width;
+}
+
+float distance(float ax, float ay, float bx, float by) {
+  return sqrt(sq(bx-ax)+sq(by-ay));
 }
 
 void setup()
@@ -104,10 +108,10 @@ void setup()
       }
     }
   }
-  image_contours.pixels[imIndex(maxi, jmaxi)] = color(255, 0, 0);
-  image_contours.pixels[imIndex(mini, jmini)] = color(255, 0, 0);
-  image_contours.pixels[imIndex(imaxj, maxj)] = color(255, 0, 0);
-  image_contours.pixels[imIndex(iminj, minj)] = color(255, 0, 0);
+  image_contours.pixels[imIndex(maxi, jmaxi)] = color(255, 0, 0);//a
+  image_contours.pixels[imIndex(mini, jmini)] = color(255, 0, 0);//b
+  image_contours.pixels[imIndex(imaxj, maxj)] = color(255, 0, 0);//c
+  image_contours.pixels[imIndex(iminj, minj)] = color(255, 0, 0);//d
   
   //suppression des arrêtes du carrée
   for (int i = 0; i < image_contours.pixels.length; i++) 
@@ -117,9 +121,59 @@ void setup()
     }
   }
   
+  int edgex, edgey;
+  int ax,ay,bx,by;
+  //ordre des coins
+  if(distance(mini, jmini, imaxj, maxj ) < 10) {
+    edgex = mini; edgey = jmini;
+    ax = maxi; ay = jmaxi;
+    bx = iminj; by = minj;
+  }
+  else if(distance(maxi, jmaxi, imaxj, maxj ) < 10) {
+    edgex = maxi; edgey = jmaxi;
+    ax = mini; ay = jmini;
+    bx = iminj; by = minj;
+  }
+  else if(distance(mini, jmini, iminj, minj ) < 10) {
+    edgex = mini; edgey = jmini;
+    ax = maxi; ay = jmaxi;
+    bx = imaxj; by = maxj;
+  }
+  else {
+    edgex = maxi; edgey = jmaxi;
+    ax = mini; ay = jmini;
+    bx = imaxj; by = maxj;
+  }
+  
+  // Calcul des vecteurs
+  PVector a = new PVector(0,0,0),b = new PVector(0,0,0);
+  a.x = ax-edgex;
+  a.y = ay-edgey;
+  b.x = bx-edgex;
+  b.y = by-edgey;
+  //a.normalize();
+  //b.normalize();
+  PVector norm = a.cross(b);
+  a.setMag(100);
+  b.setMag(100);
+  norm.setMag(100);//normalize();
+  
+  
+  
+  
+  image_contours.pixels[imIndex(edgex, edgey)] = color(255, 255, 255);
+  
   image_contours.updatePixels();
   
   //affiche l'image de départ et l'image créée
   image(image, 0, 0);
   image(image_contours,image.width, 0);
+  
+  stroke(255);
+  line(image.width+(ax+bx)/2,(ay+by)/2, image.width+(ax+bx)/2 + norm.x,(ay+by)/2 + norm.y);
+  line(image.width+edgex,edgey, image.width+edgex + a.x,edgey + a.y);
+  line(image.width+edgex,edgey, image.width+edgex + b.x,edgey + b.y);
+  println(norm);
+  println(a);
+  println(b);
 }
