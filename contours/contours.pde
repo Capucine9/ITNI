@@ -2,8 +2,8 @@ import milchreis.imageprocessing.*;
 import milchreis.imageprocessing.utils.*;
 
 
-//String imgFile ="../../data/synthetic1.png";
-String imgFile ="../../data/synthetic2.png";
+String imgFile ="../../data/synthetic1.png";
+//String imgFile ="../../data/synthetic2.png";
 //String imgFile ="../../data/synthetic3.png";
 //String imgFile ="../../data/webcam.jpg";
 //String imgFile ="../../data/smallCube1.png";
@@ -33,13 +33,20 @@ void setup()
   scale(0.8); //uniquement pour les images nommées "synthetic"
   
   //seuil de repérage de la couleur qui nous intéresse
-  double seuil = 70;
-  double dist;
+  double seuil = 35;//70;
   
   //RGB de la couleur qui nous intéresse
-  float R = 255;
-  float G = 255;
-  float B = 125;
+  float yellowR = 255;
+  float yellowG = 255;
+  float yellowB = 125;
+  
+  float redR = 224;
+  float redG = 54;
+  float redB = 0;
+  
+  float blueR = 61;
+  float blueG = 86;
+  float blueB = 127;
   
   //création d'une image sur laquelle nous allons travailler 
   image_modif = createImage(image.width, image.height, RGB);
@@ -51,14 +58,23 @@ void setup()
     image_modif.pixels[i] = color(0, 0, 0); 
   }
   
+  double sum = 0;
+  double yellowsum = 0;
   //repérage des pixels de la couleur qui nous intéresse et changement de ceux-la en blanc dans notre nouvelle image
   for (int i = 0; i < image.pixels.length; i++) 
   {
-    dist = Math.sqrt(sq(R - red(image.pixels[i])) + sq(G - green(image.pixels[i])) + sq(B - blue(image.pixels[i])));
-    
-    if(dist < seuil)
+    double distyellow = Math.sqrt(sq(yellowR - red(image.pixels[i])) + sq(yellowG - green(image.pixels[i])) + sq(yellowB - blue(image.pixels[i])));
+    double distother = Math.sqrt(sq(redR - red(image.pixels[i])) + sq(redG - green(image.pixels[i])) + sq(redB - blue(image.pixels[i])));
+    distother = Math.min(distother, Math.sqrt(sq(blueR - red(image.pixels[i])) + sq(blueG - green(image.pixels[i])) + sq(blueB - blue(image.pixels[i]))));
+    if(distyellow < seuil)
     {
       image_modif.pixels[i] = color(255, 255, 255);
+      sum++;
+      yellowsum++;
+    }
+    if(distother < seuil){
+      //image_modif.pixels[i] = color(255, 0, 0);
+      sum++;
     }
   }
   
@@ -151,8 +167,18 @@ void setup()
   a.y = ay-edgey;
   b.x = bx-edgex;
   b.y = by-edgey;
-  //a.normalize();
-  //b.normalize();
+  a.normalize();
+  b.normalize();
+  //float angle = a.dot(b);
+  //angle/=1;
+  //angle/=1;
+  //a.z = b.z = angle;
+  a.z = b.z = (float)(yellowsum/sum);
+  println(sum);
+  println(yellowsum);
+  println(a.z);
+  a.normalize();
+  b.normalize();
   PVector norm = a.cross(b);
   a.setMag(100);
   b.setMag(100);
