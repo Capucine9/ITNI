@@ -1,10 +1,13 @@
 import milchreis.imageprocessing.*;
 import milchreis.imageprocessing.utils.*;
 
+PShape cat;
+
 //String imgFile ="../../data/synthetic1.png";
 //String imgFile ="../../data/synthetic2.png";
 //String imgFile ="../../data/synthetic3.png";
-String imgFile ="../../data/synthetic4.png";
+//String imgFile ="../../data/synthetic4.png";
+String imgFile ="../../data/synthetic5.png";
 //String imgFile ="../../data/webcam.jpg";
 //String imgFile ="../../data/smallCube1.png";
 //String imgFile ="../../data/smallCube2.png";
@@ -24,7 +27,7 @@ PVector blue_a = new PVector(),blue_b = new PVector();
 
 //fenêtre d'aperçu final
 void settings() {
-  size(1600,845, P3D);
+  size(1000,1056, P3D);
 }
 
 //index du pixel de coordonnées i,j
@@ -74,8 +77,9 @@ PVector rotateAxis(PVector p, float pitch, float roll, float yaw) {
 
 void setup()
 {
-  camera(0,0,-300, 0,0, 0, 0, 1, 0);
+  camera(0,0,-1000, 0,0, 0, 0, 1, 0);
   lights();
+  cat = loadShape("../../data/cat.obj");
   
   image = loadImage(dataPath(imgFile));
   scale(0.8); //uniquement pour les images nommées "synthetic"
@@ -139,7 +143,7 @@ void setup()
   int yllwglbly = 0;
   int yllwcntr = 0;
   for (int i = 0; i < image_modif.pixels.length; i++) {
-    if(red(image_modif.pixels[i]) > 0 && green(image_modif.pixels[i]) > 0 && blue(image_modif.pixels[i]) > 0) {
+    if(red(image_modif.pixels[i]) > 0 || green(image_modif.pixels[i]) > 0 || blue(image_modif.pixels[i]) > 0) {
       PVector pos = idxReverse(i);
       glblx+=pos.x;
       glbly+=pos.y;
@@ -157,23 +161,27 @@ void setup()
   PVector dir = new PVector(yllwglbl.x,yllwglbl.y,0);
   dir.sub(glbl);
   dir.normalize();
+  float angle2 = acos(dir.dot(0,1,0));
+  println(degrees(angle2));
+  
+  image_modif.updatePixels();
+  background(image_modif);
+  stroke(255);
+  ellipse(glbl.x,glbl.y, 40,40);
+  ellipse(yllwglbl.x,yllwglbl.y, 30,30);
   
   pushMatrix();
-  rotateY(-angle1);
-  PVector axis = new PVector(0,1,0);
+  /*PVector axis = new PVector(0,1,0);
   axis = rotateAxis(axis,0,angle1,0);
   axis.normalize();
-  println(degrees(angle1));
-  println(axis);
-  float angle2 = dir.dot(axis);
-  angle2 = acos(angle2);
-  rotateX(-angle2);
-  box(50);
+  angle2 = dir.dot(axis);
+  angle2 = acos(angle2);*/
+  //rotateX(angle1);
+  rotateZ(angle2);
+  rotateX(angle1);
+  //rotateY(angle1);
+  translate(0,120,0);
+  //shapeMode(CENTER);
+  shape(cat);//box(50);
   popMatrix();
-  image_modif.updatePixels();
-  translate(0,0,500);
-  stroke(255);
-  ellipse(glbl.x-image_modif.width/2,glbl.y-image_modif.height/2, 30,30);
-  ellipse(yllwglbl.x-image_modif.width/2,yllwglbl.y-image_modif.height/2, 30,30);
-  image(image_modif,-image_modif.width/2,-image_modif.height/2);
 }
