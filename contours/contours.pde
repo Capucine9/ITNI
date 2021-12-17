@@ -1,41 +1,64 @@
 import milchreis.imageprocessing.*;
 import milchreis.imageprocessing.utils.*;
 
+PShape cat;
 
-String imgFile ="../../data/synthetic1.png";
+//String imgFile ="../../data/synthetic1.png";
 //String imgFile ="../../data/synthetic2.png";
 //String imgFile ="../../data/synthetic3.png";
+//String imgFile ="../../data/synthetic4.png";
+String imgFile ="../../data/synthetic5.png";
 //String imgFile ="../../data/webcam.jpg";
 //String imgFile ="../../data/smallCube1.png";
 //String imgFile ="../../data/smallCube2.png";
 
 PImage image;
 PImage image_modif;
-PImage image_contours;
+PImage yellow_contours;
+PImage red_contours;
+PImage blue_contours;
 
-//fenêtre d'aperçu final
+PVector yellow_edge = new PVector();
+PVector yellow_a = new PVector(),yellow_b = new PVector();
+PVector red_edge = new PVector();
+PVector red_a = new PVector(),red_b = new PVector();
+PVector blue_edge = new PVector();
+PVector blue_a = new PVector(),blue_b = new PVector();
+
+// fenêtre d'aperçu final
 void settings() {
-  size(1600,845);
+  size(800,600, P3D);
 }
 
-//index du pixel de coordonnées i,j
+// produit un indice à partir des coordonnées
 int imIndex(int i, int j) {
-  return i + j*image_contours.width;
+  return i + j*image.width;
 }
 
+// retrouve les coordonnées à partir d'un indice
+PVector imIndexReverse(int i) {
+  return new PVector(i%image.width, i/image.width);
+}
+
+// distance euclidenne entre deux points
 float distance(float ax, float ay, float bx, float by) {
   return sqrt(sq(bx-ax)+sq(by-ay));
 }
 
-void setup()
-{
+void setup() {
+  // environnement 3D
+  camera(0,0,-1000, 0,0, 0, 0, 1, 0);
+  lights();
+  cat = loadShape("../../data/cat.obj");
+  
+  // chargement de l'image
   image = loadImage(dataPath(imgFile));
-  scale(0.8); //uniquement pour les images nommées "synthetic"
+  image.resize(800,600);
   
-  //seuil de repérage de la couleur qui nous intéresse
-  double seuil = 35;//70;
+  // seuil de repérage de la couleur qui nous intéresse
+  double seuil = 20;
   
-  //RGB de la couleur qui nous intéresse
+  // RGB de la couleur qui nous intéresse
   float yellowR = 255;
   float yellowG = 255;
   float yellowB = 125;
@@ -48,156 +71,82 @@ void setup()
   float blueG = 86;
   float blueB = 127;
   
-  //création d'une image sur laquelle nous allons travailler 
+  // création d'une image sur laquelle nous allons travailler 
   image_modif = createImage(image.width, image.height, RGB);
   image_modif.loadPixels();
   
-  //mise en place d'un fond noir
+  // mise en place d'un fond noir
   for (int i = 0; i < image_modif.pixels.length; i++) 
   {
     image_modif.pixels[i] = color(0, 0, 0); 
   }
   
+  //------------------------------------------------------------------------------------
+  // calcul de la quantité de surface jaune par rapport à la surface globale du cube visible
   double sum = 0;
   double yellowsum = 0;
-  //repérage des pixels de la couleur qui nous intéresse et changement de ceux-la en blanc dans notre nouvelle image
   for (int i = 0; i < image.pixels.length; i++) 
   {
     double distyellow = Math.sqrt(sq(yellowR - red(image.pixels[i])) + sq(yellowG - green(image.pixels[i])) + sq(yellowB - blue(image.pixels[i])));
-    double distother = Math.sqrt(sq(redR - red(image.pixels[i])) + sq(redG - green(image.pixels[i])) + sq(redB - blue(image.pixels[i])));
-    distother = Math.min(distother, Math.sqrt(sq(blueR - red(image.pixels[i])) + sq(blueG - green(image.pixels[i])) + sq(blueB - blue(image.pixels[i]))));
+    double distred = Math.sqrt(sq(redR - red(image.pixels[i])) + sq(redG - green(image.pixels[i])) + sq(redB - blue(image.pixels[i])));
+    double distblue = Math.sqrt(sq(blueR - red(image.pixels[i])) + sq(blueG - green(image.pixels[i])) + sq(blueB - blue(image.pixels[i])));
     if(distyellow < seuil)
     {
-      image_modif.pixels[i] = color(255, 255, 255);
+      image_modif.pixels[i] = color(yellowR, yellowG, yellowB);
       sum++;
       yellowsum++;
     }
-    if(distother < seuil){
-      //image_modif.pixels[i] = color(255, 0, 0);
+    else if(distred < seuil){
+      image_modif.pixels[i] = color(redR, redG, redB);
+      sum++;
+    }
+    else if(distblue < seuil){
+      image_modif.pixels[i] = color(blueR, blueG, blueB);
       sum++;
     }
   }
-  
-  image_modif.updatePixels();
-  
-  //récupération des contours des pixels blancs
-  image_contours = CannyEdgeDetector.apply(image_modif);
-
-  
-  //détection des coins: utilisation du max et min de x et y on obtient 3 points en generale, on ne fait pas apparaître le dernier qui inutile et très rarement identifiable grâce a cette méthode
-  int maxi=0;
-  int jmaxi=0;
-  int mini=image_contours.width;
-  int jmini=0;
-  
-  int maxj=0;
-  int imaxj=0;
-  int minj=image_contours.height;
-  int iminj=0;
-  
-  for (int i = 1; i < image_contours.width; i++) {
-    for (int j = 1; j < image_contours.height; j++) {
-      if(image_contours.pixels[imIndex(i, j)] == color(255, 255, 255)){
-        if (maxi<i && Math.sqrt(sq(i-maxi))>10){
-          maxi=i;
-          jmaxi=j;
-        }
-      }
-      if(image_contours.pixels[imIndex(i, j)] == color(255, 255, 255)){
-        if (mini>i && Math.sqrt(sq(i-mini))>10){
-          mini=i;
-          jmini=j;
-        }
-      }
-      
-      if(image_contours.pixels[imIndex(i, j)] == color(255, 255, 255)){
-        if (maxj<j && Math.sqrt(sq(j-maxj))>10){
-          maxj=j;
-          imaxj=i;
-        }
-      }
-      if(image_contours.pixels[imIndex(i, j)] == color(255, 255, 255)){
-        if (minj>j && Math.sqrt(sq(j-minj))>10){
-          minj=j;
-          iminj=i;
-        }
-      }
+  // calcul du premier angle en fonction de la quantité de surface jaune visible
+  float angle1 = radians((float)(yellowsum/sum) * 90.0);
+  //------------------------------------------------------------------------------------
+  // calcul des positions du centre de la surface jaune et du centre du cube (coordonnées barycentriques)
+  int glblx = 0;
+  int glbly = 0;
+  int cntr = 0;
+  int yllwglblx = 0;
+  int yllwglbly = 0;
+  int yllwcntr = 0;
+  for (int i = 0; i < image_modif.pixels.length; i++) {
+    if(red(image_modif.pixels[i]) > 0 || green(image_modif.pixels[i]) > 0 || blue(image_modif.pixels[i]) > 0) {
+      PVector pos = imIndexReverse(i);
+      glblx+=pos.x;
+      glbly+=pos.y;
+      cntr++;
+    }
+    if(red(image_modif.pixels[i]) == yellowR && green(image_modif.pixels[i]) == yellowG && blue(image_modif.pixels[i]) == yellowB) {
+      PVector pos = imIndexReverse(i);
+      yllwglblx+=pos.x;
+      yllwglbly+=pos.y;
+      yllwcntr++;
     }
   }
-  image_contours.pixels[imIndex(maxi, jmaxi)] = color(255, 0, 0);//a
-  image_contours.pixels[imIndex(mini, jmini)] = color(255, 0, 0);//b
-  image_contours.pixels[imIndex(imaxj, maxj)] = color(255, 0, 0);//c
-  image_contours.pixels[imIndex(iminj, minj)] = color(255, 0, 0);//d
+  PVector glbl = new PVector(glblx/cntr,glbly/cntr);
+  PVector yllwglbl = new PVector(yllwglblx/yllwcntr,yllwglbly/yllwcntr);
+  // calcul du vecteur normal du centre du cube vers le centre de la surface jaune (2D)
+  PVector dir = new PVector(yllwglbl.x,yllwglbl.y,0);
+  dir.sub(glbl);
+  dir.normalize();
+  // calcul de l'angle entre le vecteur trouvé précédemment et l'axe y
+  float angle2 = acos(dir.dot(0,1,0));
+  //------------------------------------------------------------------------------------
   
-  //suppression des arrêtes du carrée
-  for (int i = 0; i < image_contours.pixels.length; i++) 
-  {
-    if(image_contours.pixels[i] == color(255, 255, 255)){
-      image_contours.pixels[i] = color(0, 0, 0);
-    }
-  }
+  // dessine l'arrière-plan
+  background(image);
   
-  int edgex, edgey;
-  int ax,ay,bx,by;
-  //ordre des coins
-  if(distance(mini, jmini, imaxj, maxj ) < 10) {
-    edgex = mini; edgey = jmini;
-    ax = maxi; ay = jmaxi;
-    bx = iminj; by = minj;
-  }
-  else if(distance(maxi, jmaxi, imaxj, maxj ) < 10) {
-    edgex = maxi; edgey = jmaxi;
-    ax = mini; ay = jmini;
-    bx = iminj; by = minj;
-  }
-  else if(distance(mini, jmini, iminj, minj ) < 10) {
-    edgex = mini; edgey = jmini;
-    ax = maxi; ay = jmaxi;
-    bx = imaxj; by = maxj;
-  }
-  else {
-    edgex = maxi; edgey = jmaxi;
-    ax = mini; ay = jmini;
-    bx = imaxj; by = maxj;
-  }
-  
-  // Calcul des vecteurs
-  PVector a = new PVector(0,0,0),b = new PVector(0,0,0);
-  a.x = ax-edgex;
-  a.y = ay-edgey;
-  b.x = bx-edgex;
-  b.y = by-edgey;
-  a.normalize();
-  b.normalize();
-  //float angle = a.dot(b);
-  //angle/=1;
-  //angle/=1;
-  //a.z = b.z = angle;
-  a.z = b.z = (float)(yellowsum/sum);
-  println(sum);
-  println(yellowsum);
-  println(a.z);
-  a.normalize();
-  b.normalize();
-  PVector norm = a.cross(b);
-  a.setMag(100);
-  b.setMag(100);
-  norm.setMag(100);//normalize();
-  
-  
-  image_contours.pixels[imIndex(edgex, edgey)] = color(255, 255, 255);
-  
-  image_contours.updatePixels();
-  
-  //affiche l'image de départ et l'image créée
-  image(image, 0, 0);
-  image(image_contours,image.width, 0);
-  
-  stroke(255);
-  line(image.width+(ax+bx)/2,(ay+by)/2, image.width+(ax+bx)/2 + norm.x,(ay+by)/2 + norm.y);
-  line(image.width+edgex,edgey, image.width+edgex + a.x,edgey + a.y);
-  line(image.width+edgex,edgey, image.width+edgex + b.x,edgey + b.y);
-  println(norm);
-  println(a);
-  println(b);
+  // applique les deux rotations sur le modèle et le dessine dans l'environnement 3D
+  pushMatrix();
+  rotateZ(angle2);
+  rotateX(angle1);
+  translate(0,120,0);
+  shape(cat);
+  popMatrix();
 }
