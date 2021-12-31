@@ -13,7 +13,7 @@ String imgFile ="../../data/synthetic5.png";
 //String imgFile ="../../data/smallCube1.png";
 //String imgFile ="../../data/smallCube2.png";
 
-String videoFile = "../../data/smallCube-1min.mov";
+String videoFile = "../../data/syntheticCube.mov";
 
 Movie video; // Pour la vidéo
 
@@ -83,7 +83,7 @@ void draw() {
   println("OK4");
   
   // seuil de repérage de la couleur qui nous intéresse
-  double seuil = 20;
+  double seuil = 50;
   
   // RGB de la couleur qui nous intéresse
   float yellowR = 255;
@@ -158,12 +158,14 @@ void draw() {
   }
   PVector glbl = new PVector(glblx/cntr,glbly/cntr);
   PVector yllwglbl = new PVector(yllwglblx/yllwcntr,yllwglbly/yllwcntr);
+  image.pixels[imIndex((int)yllwglbl.x,(int)yllwglbl.y)] = color(255,0,0);
+  image.pixels[imIndex((int)glbl.x,(int)glbl.y)] = color(0,255,0);
   // calcul du vecteur normal du centre du cube vers le centre de la surface jaune (2D)
   PVector dir = new PVector(yllwglbl.x,yllwglbl.y,0);
   dir.sub(glbl);
   dir.normalize();
   // calcul de l'angle entre le vecteur trouvé précédemment et l'axe y
-  float angle2 = acos(dir.dot(0,1,0));
+  float angle2 = -atan2(dir.y,dir.x)+radians(90);//acos(dir.dot(0,1,0));
   //------------------------------------------------------------------------------------
   
   // dessine l'arrière-plan
