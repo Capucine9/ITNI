@@ -14,8 +14,6 @@ String imgFile = "../../data/synthetic5.png";
 //String imgFile ="../../data/smallCube2.png";
 
 String videoFile = "../../data/syntheticCube.mov";
-//String videoFile = "../../data/webcam.mov";
-//String videoFile = "../../data/smallCube-1min.mov";
 
 Movie video; // Pour la vidéo
 
@@ -73,7 +71,7 @@ void draw() {
         image.copy(tmp, 0, 0, tmp.width, tmp.height, 0, 0, image.width, image.height);
 
         // seuil de repérage de la couleur qui nous intéresse
-        double seuil = 100;//50;
+        double seuil = 50;
 
         // RGB de la couleur qui nous intéresse
         float yellowR = 255;
@@ -99,10 +97,8 @@ void draw() {
 
         //------------------------------------------------------------------------------------
         // calcul de la quantité de surface jaune par rapport à la surface globale du cube visible
-        double pixelnmbr = image.width * image.height;
         double sum = 0;
         double yellowsum = 0;
-        Boolean show = true;
         for (int i = 0; i < image.pixels.length; i++) {
             double distyellow = Math.sqrt(sq(yellowR - red(image.pixels[i])) + sq(yellowG - green(image.pixels[i])) + sq(yellowB - blue(image.pixels[i])));
             double distred = Math.sqrt(sq(redR - red(image.pixels[i])) + sq(redG - green(image.pixels[i])) + sq(redB - blue(image.pixels[i])));
@@ -121,8 +117,6 @@ void draw() {
         }
         // calcul du premier angle en fonction de la quantité de surface jaune visible
         float angle1 = radians((float)(yellowsum / sum) * 90.0);
-        // retirer si la surface jaune est inférieure à 1% de la surface de l'écran
-        if(yellowsum/pixelnmbr*100 < 1) show = false;
         //------------------------------------------------------------------------------------
         // calcul des positions du centre de la surface jaune et du centre du cube (coordonnées barycentriques)
         int glblx = 0;
@@ -160,15 +154,13 @@ void draw() {
         // dessine l'arrière-plan
         background(image);
 
-        if(show) {
-            // applique les deux rotations sur le modèle et le dessine dans l'environnement 3D
-            pushMatrix();
-            translate(yllwglbl.x, yllwglbl.y, 0);
-            scale(0.5);
-            rotateZ(angle2);
-            rotateX(angle1);
-            shape(cat);
-            popMatrix();
-        }
+        // applique les deux rotations sur le modèle et le dessine dans l'environnement 3D
+        pushMatrix();
+        translate(yllwglbl.x, yllwglbl.y, 0);
+        scale(0.5);
+        rotateZ(angle2);
+        rotateX(angle1);
+        shape(cat);
+        popMatrix();
     }
 }
