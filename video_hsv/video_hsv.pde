@@ -42,7 +42,6 @@ void setup() {
 }
 
 void draw() {
-
     if (video.available()) {
         lights();
         image(video, 0, 0);
