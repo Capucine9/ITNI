@@ -1,3 +1,8 @@
+/*
+ * Capucine Hubert
+ * Louis-Wilhelm Raban-Schürmann
+ */
+
 import milchreis.imageprocessing.*;
 import processing.video.*;
 import milchreis.imageprocessing.utils.*;
