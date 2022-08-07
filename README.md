@@ -1,4 +1,4 @@
-# Introduction au Traitemnt Numérique d'Image
+# Introduction au Traitement Numérique d'Image
 
 Inspiré du Merge Cube.
 
