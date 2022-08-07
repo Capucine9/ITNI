@@ -1,6 +1,6 @@
 # Introduction au Traitement Numérique d'Image
 
-Inspiré du Merge Cube.
+Réalité Augmenté inspiré du Merge Cube.
 
 Réalisation d'un programme permettant de rajouter un objet 3D sur des images et vidéos utilisant les valeurs RGB ou encore HSV afin de discerner les différentes faces du cube par la couleur. 
 
